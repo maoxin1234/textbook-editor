@@ -7,8 +7,9 @@
 
 ## 截图 | Screenshots
 
-*章节树 + Word 风格页面视图 + AI 写作助手面板*  
-*Chapter tree · Word-style page view · AI writing assistant panel*
+| 登录页 | 编辑器（Word 页面视图 + AI 助手）|
+|--------|----------------------------------|
+| ![登录页](./textbook-editor/screenshots/preview1.png) | ![编辑器](./textbook-editor/screenshots/preview2.png) |
 
 ---
 
@@ -18,7 +19,7 @@
 | 功能 | Feature |
 |------|---------|
 | 注册 / 登录，JWT 鉴权（7天有效期） | Register / login with JWT authentication |
-| 数据存储在 PostgreSQL，支持多设备访问 | Data in PostgreSQL, accessible from any device |
+| 数据存储在本地 SQLite，零配置开箱即用 | Data in local SQLite, zero-config out of the box |
 | 每个用户的项目完全隔离 | Complete data isolation per user |
 
 ### RAG 写作增强 | RAG Writing Enhancement
@@ -88,7 +89,6 @@ Built-in quick actions: **Continue · Polish · Summarize · Expand** + custom p
 
 - Node.js ≥ 18
 - Python ≥ 3.10
-- PostgreSQL ≥ 14（用于用户数据持久化 | For user data persistence）
 
 ### 前端 | Frontend
 
@@ -99,21 +99,6 @@ npm run dev
 ```
 
 访问 / Open: `http://localhost:5173`
-
-### 数据库 | Database
-
-```sql
--- PostgreSQL 中创建数据库（首次使用）
-CREATE DATABASE textbook_editor;
-```
-
-复制配置文件并填写数据库连接信息：  
-Copy the config file and fill in your database credentials:
-
-```bash
-cp backend/.env.example backend/.env
-# 编辑 DATABASE_URL 和 SECRET_KEY
-```
 
 ### 后端 | Backend
 
@@ -173,7 +158,7 @@ macOS / Linux 无需额外操作 / macOS and Linux require no extra steps.
 
 ### 后端 | Backend
 - **FastAPI** — Web 框架 | Web framework
-- **SQLAlchemy 2.0 (async)** + **asyncpg** — 异步 ORM + PostgreSQL | Async ORM + PostgreSQL
+- **SQLAlchemy 2.0 (async)** + **aiosqlite** — 异步 ORM + SQLite | Async ORM + SQLite
 - **python-jose** + **passlib[bcrypt]** — JWT 鉴权 + 密码哈希 | JWT auth + password hashing
 - **ChromaDB** — 向量数据库（本地持久化）| Vector database (local persistence)
 - **pypdf** + **python-docx** — 文档解析 | Document parsing for RAG
@@ -226,7 +211,7 @@ macOS / Linux 无需额外操作 / macOS and Linux require no extra steps.
 
 | | 本项目 | GitBook | BookStack | Bibisco |
 |--|--------|---------|-----------|---------|
-| 用户注册 / 多设备访问 | ✅ JWT + PostgreSQL | ✅ SaaS | ✅ 自托管 | ❌ 本地 |
+| 用户系统 / JWT 鉴权 | ✅ JWT + SQLite | ✅ SaaS | ✅ 自托管 | ❌ |
 | 国产 AI 模型支持 | ✅ 8 个 | ❌ | ❌ | ❌ |
 | RAG 参考资料增强 | ✅ ChromaDB | ❌ | ❌ | ❌ |
 | Word / PDF 导出 | ✅ | ⚠️ 付费 | ⚠️ 有限 | ✅ |

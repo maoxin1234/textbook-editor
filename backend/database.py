@@ -4,7 +4,7 @@ from sqlalchemy.orm import DeclarativeBase
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql+asyncpg://postgres:postgres@localhost/textbook_editor",
+    "sqlite+aiosqlite:///./textbook_editor.db",
 )
 
 engine = create_async_engine(DATABASE_URL, echo=False)
