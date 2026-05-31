@@ -11,6 +11,7 @@ backend/**/*.pyc
 backend/venv/
 backend/.venv/
 backend/.env
+backend/chroma_db/
 
 # ── 本地工具 / 测试产物 ────────────────
 .claude/

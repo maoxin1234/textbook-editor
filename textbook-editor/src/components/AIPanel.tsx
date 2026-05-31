@@ -1,13 +1,14 @@
 import { useState, useRef, useCallback } from 'react';
 import { Button, Textarea, Space, Tag, MessagePlugin, Divider } from 'tdesign-react';
-import { loadAISettings, loadAllCredentials, chatStream } from '../utils/api';
-import type { AISettings } from '../utils/api';
+import { loadAISettings, loadAllCredentials } from '../store/settings';
+import { chatStream } from '../utils/api';
+import type { AISettings } from '../store/settings';
+import RAGPanel from './RAGPanel';
 
 interface AIPanelProps {
-  /** 当前章节的纯文本内容，作为 AI 上下文 */
   contextText: string;
-  /** 将 AI 生成内容插入编辑器 */
   onInsert: (text: string) => void;
+  projectId?: string;
 }
 
 const QUICK_ACTIONS = [
@@ -33,10 +34,11 @@ const QUICK_ACTIONS = [
   },
 ];
 
-export default function AIPanel({ contextText, onInsert }: AIPanelProps) {
+export default function AIPanel({ contextText, onInsert, projectId }: AIPanelProps) {
   const [customPrompt, setCustomPrompt] = useState('');
   const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [useRag, setUseRag] = useState(false);
   const [settings] = useState<AISettings>(loadAISettings);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -70,11 +72,9 @@ export default function AIPanel({ contextText, onInsert }: AIPanelProps) {
           messages,
           chunk => setOutput(prev => prev + chunk),
           () => setLoading(false),
-          err => {
-            MessagePlugin.error(err);
-            setLoading(false);
-          },
-          abortRef.current.signal
+          err => { MessagePlugin.error(err); setLoading(false); },
+          abortRef.current.signal,
+          { useRag, projectId },
         );
       } catch (e: any) {
         if (e?.name !== 'AbortError') MessagePlugin.error(String(e));
@@ -101,19 +101,20 @@ export default function AIPanel({ contextText, onInsert }: AIPanelProps) {
     >
       {/* 当前模型标签 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-        <Tag size="small" theme="primary" variant="light">
-          {settings.provider}
-        </Tag>
-        <Tag size="small" theme="default" variant="light">
-          {settings.model}
-        </Tag>
-        <a
-          href="#/settings"
-          style={{ fontSize: 12, color: '#999', marginLeft: 'auto' }}
-        >
-          更改
-        </a>
+        <Tag size="small" theme="primary" variant="light">{settings.provider}</Tag>
+        <Tag size="small" theme="default" variant="light">{settings.model}</Tag>
+        <a href="#/settings" style={{ fontSize: 12, color: '#999', marginLeft: 'auto' }}>更改</a>
       </div>
+
+      {/* 参考资料 / RAG */}
+      {projectId && (
+        <>
+          <Divider style={{ margin: '4px 0' }} />
+          <div style={{ fontSize: 12, color: '#999', marginBottom: 4 }}>参考资料（RAG）</div>
+          <RAGPanel projectId={projectId} useRag={useRag} onToggle={setUseRag} />
+        </>
+      )}
+
 
       {/* 快捷操作 */}
       <div>

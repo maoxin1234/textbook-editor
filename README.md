@@ -14,6 +14,21 @@
 
 ## 功能特性 | Features
 
+### 用户系统 | User System
+| 功能 | Feature |
+|------|---------|
+| 注册 / 登录，JWT 鉴权（7天有效期） | Register / login with JWT authentication |
+| 数据存储在 PostgreSQL，支持多设备访问 | Data in PostgreSQL, accessible from any device |
+| 每个用户的项目完全隔离 | Complete data isolation per user |
+
+### RAG 写作增强 | RAG Writing Enhancement
+| 功能 | Feature |
+|------|---------|
+| 上传参考资料（PDF / DOCX / TXT / MD） | Upload reference documents |
+| 自动分块 + 本地 ONNX 嵌入（无需额外 API Key） | Auto-chunking + local ONNX embedding (no extra API key) |
+| ChromaDB 向量存储，按项目隔离 | ChromaDB vector store, isolated per project |
+| AI 对话时一键启用 RAG，自动检索相关段落注入上下文 | One-click RAG toggle in AI panel, auto-retrieves relevant chunks |
+
 ### 编辑器 | Editor
 | 功能 | Feature |
 |------|---------|
@@ -73,7 +88,8 @@ Built-in quick actions: **Continue · Polish · Summarize · Expand** + custom p
 ### 前置要求 | Prerequisites
 
 - Node.js ≥ 18
-- Python ≥ 3.10（仅 Word/PDF 导出和 AI 功能需要 | Only for Word/PDF export and AI features）
+- Python ≥ 3.10
+- PostgreSQL ≥ 14（用于用户数据持久化 | For user data persistence）
 
 ### 前端 | Frontend
 
@@ -85,7 +101,22 @@ npm run dev
 
 访问 / Open: `http://localhost:5173`
 
-### 后端（可选）| Backend (Optional)
+### 数据库 | Database
+
+```sql
+-- PostgreSQL 中创建数据库（首次使用）
+CREATE DATABASE textbook_editor;
+```
+
+复制 `.env.example` 为 `.env` 并填写数据库连接信息：  
+Copy `.env.example` to `.env` and fill in your database credentials:
+
+```bash
+cp backend/.env.example backend/.env
+# 编辑 DATABASE_URL 和 SECRET_KEY
+```
+
+### 后端 | Backend
 
 ```bash
 cd backend
@@ -144,8 +175,11 @@ macOS / Linux 无需额外操作 / macOS and Linux require no extra steps.
 
 ### 后端 | Backend
 - **FastAPI** — Web 框架 | Web framework
-- **python-docx** — Word 导出 | Word export
-- **WeasyPrint** — PDF 导出 | PDF export
+- **SQLAlchemy 2.0 (async)** + **asyncpg** — 异步 ORM + PostgreSQL | Async ORM + PostgreSQL
+- **python-jose** + **passlib[bcrypt]** — JWT 鉴权 + 密码哈希 | JWT auth + password hashing
+- **ChromaDB** — 向量数据库（本地持久化）| Vector database (local persistence)
+- **pypdf** + **python-docx** — 文档解析 | Document parsing for RAG
+- **python-docx** + **WeasyPrint** — Word / PDF 导出 | Word / PDF export
 - **openai SDK** — OpenAI 兼容模型统一接入 | Unified OpenAI-compatible model access
 - **anthropic SDK** — Claude 模型接入 | Claude model access
 - **httpx** — 百度文心一言异步请求 | Async requests for Baidu ERNIE

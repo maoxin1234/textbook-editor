@@ -450,6 +450,7 @@ export default function EditorPage() {
               <AIPanel
                 contextText={contextText}
                 onInsert={handleAIInsert}
+                projectId={projectId}
               />
             </div>
           )}
