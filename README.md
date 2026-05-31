@@ -52,8 +52,7 @@
 | 拖拽排序（同级） | Drag-and-drop reordering (same level) |
 | 删除确认保护 | Delete confirmation guard |
 | 800ms 防抖自动保存 | 800 ms debounced auto-save |
-| IndexedDB 本地存储，无大小限制 | IndexedDB local storage, no size limit |
-| 旧 localStorage 数据自动迁移 | Automatic migration from legacy localStorage |
+| PostgreSQL 持久化，支持多设备访问 | PostgreSQL persistence, multi-device access |
 
 ### 导出 | Export
 | 格式 | Format | 说明 | Notes |
@@ -108,8 +107,8 @@ npm run dev
 CREATE DATABASE textbook_editor;
 ```
 
-复制 `.env.example` 为 `.env` 并填写数据库连接信息：  
-Copy `.env.example` to `.env` and fill in your database credentials:
+复制配置文件并填写数据库连接信息：  
+Copy the config file and fill in your database credentials:
 
 ```bash
 cp backend/.env.example backend/.env
@@ -170,7 +169,6 @@ macOS / Linux 无需额外操作 / macOS and Linux require no extra steps.
 - **Vite 8** — 构建工具 | Build tool
 - **TDesign React** — UI 组件库 | UI component library
 - **TipTap 3** — 富文本编辑器内核 | Rich text editor core
-- **idb** — IndexedDB 封装 | IndexedDB wrapper
 - **React Router 7** — 路由 | Routing
 
 ### 后端 | Backend
@@ -192,24 +190,32 @@ macOS / Linux 无需额外操作 / macOS and Linux require no extra steps.
 .
 ├── textbook-editor/          # 前端 | Frontend (React + Vite)
 │   ├── src/
-│   │   ├── components/       # 富文本编辑器、AI 面板 | Editor, AI panel
+│   │   ├── components/       # 编辑器、AI 面板、RAG 面板 | Editor, AI & RAG panels
 │   │   ├── extensions/       # TipTap 自定义扩展（字号）| Custom TipTap extensions
 │   │   ├── hooks/            # useDebounce
-│   │   ├── pages/            # 首页、编辑器页、设置页 | Home, Editor, Settings
-│   │   ├── store/            # IndexedDB 数据层 | IndexedDB data layer
+│   │   ├── pages/            # 登录、注册、首页、编辑器、设置 | Login, Register, Home, Editor, Settings
+│   │   ├── store/            # API 数据层 + 设置管理 | API data layer + settings
 │   │   ├── types/            # TypeScript 类型 | TypeScript types
-│   │   └── utils/            # 导出工具、后端 API 客户端 | Export, API client
+│   │   └── utils/            # 导出工具、AI 流式调用、JWT | Export, AI stream, JWT auth
 │   └── package.json
 │
 └── backend/                  # 后端 | Backend (Python + FastAPI)
-    ├── main.py
+    ├── main.py               # 应用入口，自动建表 | App entry, auto create tables
+    ├── database.py           # SQLAlchemy 异步引擎 | Async SQLAlchemy engine
+    ├── models.py             # ORM 模型：User / Project / Chapter / RagDocument
+    ├── schemas.py            # Pydantic 请求/响应模型 | Request & response schemas
+    ├── deps.py               # JWT 鉴权依赖 | JWT auth dependency
     ├── providers/            # AI 模型适配层 | AI model adapters
     │   ├── openai_compat.py  # OpenAI 兼容（DeepSeek / Qwen / Kimi 等）
     │   ├── anthropic_provider.py
     │   ├── baidu.py          # 文心一言（独立鉴权）| ERNIE (custom auth)
     │   └── registry.py       # 模型注册表 | Model registry
     ├── routers/
-    │   ├── ai.py             # SSE 流式对话 | SSE streaming chat
+    │   ├── auth.py           # 注册 / 登录 / 用户信息 | Register / login / me
+    │   ├── projects.py       # 项目 CRUD | Project CRUD
+    │   ├── chapters.py       # 章节 CRUD + 排序 | Chapter CRUD + reorder
+    │   ├── rag.py            # 文档上传、向量化、检索 | Upload, embed, retrieve
+    │   ├── ai.py             # SSE 流式对话 + RAG 注入 | SSE chat + RAG injection
     │   └── export.py         # Word / PDF 导出 | Word / PDF export
     └── requirements.txt
 ```
@@ -220,11 +226,12 @@ macOS / Linux 无需额外操作 / macOS and Linux require no extra steps.
 
 | | 本项目 | GitBook | BookStack | Bibisco |
 |--|--------|---------|-----------|---------|
-| 本地优先，无需注册 | ✅ | ❌ SaaS | ⚠️ 自托管 | ✅ |
+| 用户注册 / 多设备访问 | ✅ JWT + PostgreSQL | ✅ SaaS | ✅ 自托管 | ❌ 本地 |
 | 国产 AI 模型支持 | ✅ 8 个 | ❌ | ❌ | ❌ |
+| RAG 参考资料增强 | ✅ ChromaDB | ❌ | ❌ | ❌ |
 | Word / PDF 导出 | ✅ | ⚠️ 付费 | ⚠️ 有限 | ✅ |
 | Web 界面 | ✅ | ✅ | ✅ | ❌ 桌面端 |
-| 免费开源 | ✅ | ⚠️ 部分 | ✅ | ✅ |
+| 免费开源 / 可自托管 | ✅ | ❌ | ✅ | ✅ |
 
 ---
 
@@ -232,11 +239,11 @@ macOS / Linux 无需额外操作 / macOS and Linux require no extra steps.
 
 | 限制 | Limitation |
 |------|-----------|
-| 数据仅存本地浏览器，不支持多设备同步 | Data stored locally in browser only, no multi-device sync |
 | 暂无版本历史 / 快照功能 | No version history or snapshots |
 | 仅支持单人使用，无协同编辑 | Single-user only, no real-time collaboration |
 | 拖拽排序仅限同级节点 | Drag-and-drop reordering limited to same-level nodes |
 | PDF 导出在 Windows 需额外安装 GTK3 | PDF export on Windows requires GTK3 runtime |
+| RAG 嵌入模型首次使用需下载 ~90MB ONNX 模型 | RAG embedding model requires ~90 MB ONNX download on first use |
 
 ---
 
