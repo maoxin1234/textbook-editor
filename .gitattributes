@@ -1,0 +1,3 @@
+# 统一使用 LF 换行，避免 Windows CRLF 警告
+* text=auto eol=lf
+*.bat text eol=crlf

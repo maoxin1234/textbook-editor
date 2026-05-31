@@ -1,0 +1,27 @@
+# ── 前端 ──────────────────────────────
+textbook-editor/node_modules/
+textbook-editor/dist/
+textbook-editor/.vite/
+
+# ── 后端 ──────────────────────────────
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.pyc
+backend/**/*.pyc
+backend/venv/
+backend/.venv/
+backend/.env
+
+# ── 本地工具 / 测试产物 ────────────────
+.claude/
+.playwright-cli/
+textbook-editor/*.yml
+textbook-editor/*.yaml
+
+# ── 系统 / IDE ─────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo

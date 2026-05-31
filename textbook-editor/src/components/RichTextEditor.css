@@ -1,0 +1,343 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   RichTextEditor — Word 风格样式
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 外层容器 ───────────────────────────────────────────────────────────────── */
+.rich-editor-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* ── 工具栏 ─────────────────────────────────────────────────────────────────── */
+.rich-editor-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 4px 8px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #fafafa;
+  flex-shrink: 0;
+}
+
+/* 原生 select（字体 / 字号） */
+.toolbar-select {
+  height: 26px;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  padding: 0 4px;
+  font-size: 12px;
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+  color: #333;
+  transition: border-color 0.2s;
+}
+.toolbar-select:hover,
+.toolbar-select:focus {
+  border-color: #0052d9;
+}
+.toolbar-select--font { width: 108px; }
+.toolbar-select--size { width: 110px; }
+
+/* 文字颜色按钮 */
+.toolbar-color-btn {
+  position: relative;
+  display: inline-flex;
+}
+.toolbar-color-trigger {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 26px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  padding: 2px 4px;
+  gap: 1px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.toolbar-color-trigger:hover {
+  border-color: #d0d0d0;
+  background: #f0f0f0;
+}
+.toolbar-color-letter {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  color: #333;
+}
+.toolbar-color-bar {
+  width: 16px;
+  height: 3px;
+  border-radius: 1px;
+}
+.toolbar-color-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* 高亮颜色按钮 */
+.toolbar-highlight-wrap {
+  position: relative;
+  display: inline-flex;
+}
+.toolbar-highlight-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 26px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.toolbar-highlight-trigger:hover,
+.toolbar-highlight-trigger.is-active {
+  border-color: #d0d0d0;
+  background: #f0f0f0;
+}
+.toolbar-hl-icon {
+  font-size: 13px;
+  font-weight: 700;
+  background: linear-gradient(to bottom, transparent 30%, #FFFF00 30%);
+  padding: 0 1px;
+}
+.toolbar-highlight-picker {
+  position: absolute;
+  top: 30px;
+  left: 0;
+  z-index: 200;
+  display: flex;
+  gap: 4px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+.toolbar-hl-swatch {
+  width: 22px;
+  height: 22px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.toolbar-hl-swatch:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+.toolbar-hl-none {
+  background: #fff;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+}
+
+/* ── 页面视图容器（Word 灰色背景） ─────────────────────────────────────────── */
+.rich-editor-body {
+  flex: 1;
+  overflow-y: auto;
+  background: #d8d8d8;
+  padding: 24px 16px 40px;
+}
+
+/* ── 内容区（模拟 A4 白纸页面） ──────────────────────────────────────────────── */
+.rich-editor-content {
+  max-width: 794px;
+  min-height: 1020px;
+  margin: 0 auto;
+  padding: 80px 88px;
+  background: #ffffff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  border-radius: 2px;
+
+  font-family: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", sans-serif;
+  font-size: 14px;
+  line-height: 1.8;
+  color: #1a1a1a;
+  caret-color: #0052d9;
+
+  outline: none;
+}
+
+/* 占位符 */
+.rich-editor-content p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #adb5bd;
+  pointer-events: none;
+  height: 0;
+}
+
+/* ── 标题（Word 内置标题风格） ───────────────────────────────────────────────── */
+.rich-editor-content h1 {
+  font-size: 22pt;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 24px 0 12px;
+  line-height: 1.3;
+  border-bottom: 2px solid #0052d9;
+  padding-bottom: 6px;
+}
+.rich-editor-content h2 {
+  font-size: 16pt;
+  font-weight: 700;
+  color: #0052d9;
+  margin: 20px 0 10px;
+  line-height: 1.3;
+}
+.rich-editor-content h3 {
+  font-size: 13pt;
+  font-weight: 700;
+  color: #333;
+  margin: 16px 0 8px;
+  line-height: 1.3;
+}
+.rich-editor-content h4 {
+  font-size: 11pt;
+  font-weight: 700;
+  color: #555;
+  margin: 12px 0 6px;
+  line-height: 1.3;
+}
+
+/* ── 段落 ──────────────────────────────────────────────────────────────────── */
+.rich-editor-content p {
+  margin: 0 0 8px;
+}
+
+/* ── 列表 ──────────────────────────────────────────────────────────────────── */
+.rich-editor-content ul,
+.rich-editor-content ol {
+  margin: 6px 0 10px;
+  padding-left: 28px;
+}
+.rich-editor-content li { margin-bottom: 4px; line-height: 1.8; }
+.rich-editor-content ul li::marker { color: #0052d9; }
+
+/* ── 引用块 ────────────────────────────────────────────────────────────────── */
+.rich-editor-content blockquote {
+  border-left: 4px solid #0052d9;
+  margin: 12px 0;
+  padding: 8px 16px;
+  background: #f7f9ff;
+  color: #555;
+  border-radius: 0 4px 4px 0;
+  font-style: italic;
+}
+
+/* ── 代码 ──────────────────────────────────────────────────────────────────── */
+.rich-editor-content code {
+  background: #f3f4f6;
+  color: #c7254e;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 0.9em;
+}
+.rich-editor-content pre {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 16px 20px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 12px 0;
+  line-height: 1.6;
+}
+.rich-editor-content pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  font-size: 13px;
+}
+
+/* ── 表格 ──────────────────────────────────────────────────────────────────── */
+.rich-editor-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 12px 0;
+  font-size: 13px;
+}
+.rich-editor-content th,
+.rich-editor-content td {
+  border: 1px solid #c8c8c8;
+  padding: 7px 12px;
+  vertical-align: top;
+  min-width: 60px;
+}
+.rich-editor-content th {
+  background: #dce9ff;
+  font-weight: 700;
+  color: #003799;
+  text-align: left;
+}
+.rich-editor-content tr:nth-child(even) td { background: #f8faff; }
+.rich-editor-content tr:hover td { background: #eef3ff; }
+.rich-editor-content .selectedCell { background: #cce0ff !important; }
+
+/* ── 图片 ──────────────────────────────────────────────────────────────────── */
+.rich-editor-content img {
+  max-width: 100%;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  display: block;
+  margin: 8px auto;
+}
+.rich-editor-content img.ProseMirror-selectednode {
+  outline: 3px solid #0052d9;
+}
+
+/* ── 分割线 ────────────────────────────────────────────────────────────────── */
+.rich-editor-content hr {
+  border: none;
+  border-top: 1px solid #c8c8c8;
+  margin: 20px 0;
+}
+
+/* ── 文字格式 ──────────────────────────────────────────────────────────────── */
+.rich-editor-content strong { font-weight: 700; }
+.rich-editor-content em { font-style: italic; }
+.rich-editor-content u { text-decoration: underline; }
+.rich-editor-content s { text-decoration: line-through; color: #999; }
+.rich-editor-content mark { border-radius: 2px; padding: 0 1px; }
+
+/* ── 光标选区 ──────────────────────────────────────────────────────────────── */
+.rich-editor-content ::selection { background: #b3d1ff; }
+
+/* ── 表格操作栏 ────────────────────────────────────────────────────────────── */
+.rich-editor-table-actions {
+  padding: 4px 8px;
+  border-top: 1px solid #e0e0e0;
+  background: #fffbf0;
+  flex-shrink: 0;
+}
+
+/* ── 状态栏（字数统计） ─────────────────────────────────────────────────────── */
+.rich-editor-statusbar {
+  display: flex;
+  align-items: center;
+  padding: 3px 12px;
+  border-top: 1px solid #e0e0e0;
+  background: #fafafa;
+  font-size: 11px;
+  color: #888;
+  flex-shrink: 0;
+  user-select: none;
+}
